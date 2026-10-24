@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text{font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;fill:#19324b}
+      .title{font-size:36px;font-weight:700}.subtitle{font-size:19px;fill:#53677d}
+      .h{font-size:24px;font-weight:700}.body{font-size:17px}.small{font-size:14px;fill:#52667b}.tiny{font-size:12px;fill:#52667b}
+      .card{fill:#fff;stroke:#d9e3ee;stroke-width:2}.teal{fill:#e5f7f3;stroke:#5abca9;stroke-width:2}
+      .purple{fill:#f0edff;stroke:#9185df;stroke-width:2}.blue{fill:#e9f2ff;stroke:#72a8e8;stroke-width:2}
+      .orange{fill:#fff2df;stroke:#e6a44d;stroke-width:2}.arrow{stroke:#72869a;stroke-width:2.5;fill:none;marker-end:url(#arr)}
+    </style>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#72869a"/></marker>
+  </defs>
+  <rect width="1600" height="980" fill="#f4f7fb"/>
+  <text x="60" y="68" class="title">第五讲｜DSK 和 DSG 到底在做什么？</text>
+  <text x="62" y="108" class="subtitle">它们接收的是 RepViT 提取的特征图，不是原始图片；两者处理线索的方式不同。</text>
+
+  <rect x="50" y="145" width="735" height="760" rx="22" class="card"/>
+  <rect x="815" y="145" width="735" height="760" rx="22" class="card"/>
+  <rect x="75" y="168" width="685" height="55" rx="14" class="teal"/>
+  <text x="417" y="204" text-anchor="middle" class="h">DSK：比较不同大小的局部范围</text>
+  <rect x="840" y="168" width="685" height="55" rx="14" class="purple"/>
+  <text x="1182" y="204" text-anchor="middle" class="h">DSG：让不同通道的线索相互作用</text>
+
+  <!-- DSK -->
+  <rect x="269" y="246" width="300" height="62" rx="13" class="blue"/>
+  <text x="419" y="272" text-anchor="middle" class="body">输入特征图 x</text>
+  <text x="419" y="295" text-anchor="middle" class="small">B×384×7×7</text>
+  <path d="M419 309 V330 M180 330 H655 M180 330 V348 M417 330 V348 M655 330 V348" class="arrow"/>
+  <rect x="93" y="350" width="175" height="75" rx="13" class="teal"/>
+  <text x="180" y="380" text-anchor="middle" class="body">3×3 depthwise</text><text x="180" y="405" text-anchor="middle" class="small">偏细的局部范围</text>
+  <rect x="330" y="350" width="175" height="75" rx="13" class="teal"/>
+  <text x="417" y="380" text-anchor="middle" class="body">5×5 depthwise</text><text x="417" y="405" text-anchor="middle" class="small">中等局部范围</text>
+  <rect x="568" y="350" width="175" height="75" rx="13" class="teal"/>
+  <text x="655" y="380" text-anchor="middle" class="body">7×7 depthwise</text><text x="655" y="405" text-anchor="middle" class="small">dilation = 3，更宽范围</text>
+  <path d="M180 426 V450 M417 426 V450 M655 426 V450 M180 450 H655 M417 450 V463" class="arrow"/>
+  <rect x="211" y="466" width="412" height="66" rx="13" class="blue"/>
+  <text x="417" y="493" text-anchor="middle" class="body">按三个分支的空间位置生成权重</text>
+  <text x="417" y="518" text-anchor="middle" class="small">selector + Softmax → B×3×7×7</text>
+  <path d="M417 533 V552" class="arrow"/>
+  <rect x="113" y="560" width="608" height="88" rx="13" class="orange"/>
+  <text x="417" y="592" text-anchor="middle" class="body">每个位置：权重₁×小范围 + 权重₂×中范围 + 权重₃×大范围</text>
+  <text x="417" y="623" text-anchor="middle" class="small">三个权重相加为 1；不是裁三张图，而是融合特征图</text>
+  <path d="M417 649 V670" class="arrow"/>
+  <rect x="227" y="678" width="380" height="70" rx="13" class="teal"/>
+  <text x="417" y="707" text-anchor="middle" class="body">1×1 投影，再走残差连接</text>
+  <text x="417" y="732" text-anchor="middle" class="small">输出 = x + γ × 融合结果</text>
+  <rect x="110" y="774" width="614" height="85" rx="14" fill="#f7fafc" stroke="#dbe5ed" stroke-width="2"/>
+  <text x="132" y="806" class="small">白话：像让模型同时参考“近处纹理”和“稍大范围的背景”，</text>
+  <text x="132" y="833" class="small">再由它自己决定每个位置更该信哪种范围。这里只是比喻。</text>
+
+  <!-- DSG -->
+  <rect x="1000" y="246" width="365" height="62" rx="13" class="blue"/>
+  <text x="1182" y="272" text-anchor="middle" class="body">输入特征图 x</text>
+  <text x="1182" y="295" text-anchor="middle" class="small">B×384×7×7 → BatchNorm</text>
+  <path d="M1182 309 V329 M1047 329 H1374 M1047 329 V347 M1374 329 V347" class="arrow"/>
+  <rect x="866" y="350" width="285" height="88" rx="13" class="purple"/>
+  <text x="1008" y="381" text-anchor="middle" class="body">分支 A</text>
+  <text x="1008" y="407" text-anchor="middle" class="small">1×1 Conv：384→768 + BN + SiLU</text>
+  <rect x="1214" y="350" width="285" height="88" rx="13" class="purple"/>
+  <text x="1356" y="381" text-anchor="middle" class="body">分支 B</text>
+  <text x="1356" y="407" text-anchor="middle" class="small">1×1 Conv：384→768 + BN + SiLU</text>
+  <path d="M1008 439 V469 H1154 M1356 439 V469 H1210" class="arrow"/>
+  <circle cx="1182" cy="482" r="39" fill="#fff2df" stroke="#e6a44d" stroke-width="2"/>
+  <text x="1182" y="491" text-anchor="middle" class="h">×</text>
+  <text x="1182" y="541" text-anchor="middle" class="small">逐元素相乘，形成门控特征</text>
+  <path d="M1182 546 V565" class="arrow"/>
+  <rect x="1040" y="573" width="285" height="73" rx="13" class="blue"/>
+  <text x="1182" y="603" text-anchor="middle" class="body">1×1 投影：768→384</text>
+  <text x="1182" y="628" text-anchor="middle" class="small">回到原有通道数</text>
+  <path d="M1182 647 V670" class="arrow"/>
+  <rect x="1024" y="678" width="316" height="70" rx="13" class="purple"/>
+  <text x="1182" y="707" text-anchor="middle" class="body">输出 = x + γ × z</text>
+  <text x="1182" y="732" text-anchor="middle" class="small">残差保留原特征，γ 初始为 0</text>
+  <rect x="875" y="774" width="614" height="85" rx="14" fill="#f7fafc" stroke="#dbe5ed" stroke-width="2"/>
+  <text x="897" y="806" class="small">白话：两条支路把同一份特征变成两种表达，再逐项相乘，</text>
+  <text x="897" y="833" class="small">让组合后的通道线索参与后续判断；不是两张图片相乘。</text>
+
+  <text x="60" y="945" class="small">尺寸提示：两个模块都保持 B×384×7×7；它们增强特征表达，不输出框坐标或像素级缺陷位置。</text>
+</svg>

@@ -1,0 +1,5 @@
+﻿,normal,pad_surface_mark_defect,probe_mark_offset_defect,surface_contamination_defect
+normal,0.9993527508090615,0.0,0.0,0.0006472491909385113
+pad_surface_mark_defect,0.0,1.0,0.0,0.0
+probe_mark_offset_defect,0.0,0.0,1.0,0.0
+surface_contamination_defect,0.018518518518518517,0.0,0.0,0.9814814814814815

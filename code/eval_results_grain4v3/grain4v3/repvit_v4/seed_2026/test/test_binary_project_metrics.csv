@@ -1,0 +1,2 @@
+﻿task_name,model_name,seed,eval_split,normal_total,defect_total,binary_tn,binary_fp,binary_fn,binary_tp,defect_detection_rate,miss_rate,false_alarm_rate,detection_error_rate,num_detection_errors
+grain4v3,repvit_v4,2026,test,18540,10547,18518,22,35,10512,0.9966815208116052,0.003318479188394804,0.0011866235167206042,0.00195963832640011,57

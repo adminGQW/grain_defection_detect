@@ -1,0 +1,5 @@
+﻿class_name,precision,recall,f1_score,support,correct_num,error_num
+normal,0.9977382875605816,0.9993527508090615,0.9985448666127729,3090,3088,2
+pad_surface_mark_defect,1.0,1.0,1.0,780,780,0
+probe_mark_offset_defect,1.0,1.0,1.0,600,600,0
+surface_contamination_defect,0.9946380697050938,0.9814814814814815,0.9880159786950732,378,371,7

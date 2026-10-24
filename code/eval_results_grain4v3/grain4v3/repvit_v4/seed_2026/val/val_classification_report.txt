@@ -1,0 +1,10 @@
+                              precision    recall  f1-score   support
+
+                      normal     0.9977    0.9994    0.9985      3090
+     pad_surface_mark_defect     1.0000    1.0000    1.0000       780
+    probe_mark_offset_defect     1.0000    1.0000    1.0000       600
+surface_contamination_defect     0.9946    0.9815    0.9880       378
+
+                    accuracy                         0.9981      4848
+                   macro avg     0.9981    0.9952    0.9966      4848
+                weighted avg     0.9981    0.9981    0.9981      4848

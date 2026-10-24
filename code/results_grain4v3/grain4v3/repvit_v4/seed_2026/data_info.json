@@ -1,0 +1,18 @@
+{
+    "num_classes": 4,
+    "class_names": [
+        "normal",
+        "pad_surface_mark_defect",
+        "probe_mark_offset_defect",
+        "surface_contamination_defect"
+    ],
+    "class_to_idx": {
+        "normal": 0,
+        "pad_surface_mark_defect": 1,
+        "probe_mark_offset_defect": 2,
+        "surface_contamination_defect": 3
+    },
+    "train_size": 25095,
+    "val_size": 4848,
+    "test_size": 29087
+}

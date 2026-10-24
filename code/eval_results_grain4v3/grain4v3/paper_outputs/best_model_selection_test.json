@@ -1,0 +1,8 @@
+{
+    "eval_split": "test",
+    "best_architecture": "repvit_v4",
+    "best_seed": 2026,
+    "best_run_macro_f1": 0.9963041604310835,
+    "best_run_accuracy": 0.9979716024340771,
+    "selection_rule": "Best architecture selected by highest mean test Macro-F1 across seeds; representative checkpoint selected by highest single-run test Macro-F1 within that architecture."
+}

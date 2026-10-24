@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>晶粒缺陷可视化识别</title>
+<!-- CSS（页面样式规则）控制颜色、尺寸与布局；:root 的变量适合统一换色，移动端布局在 @media 中。 -->
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #162338;
+      --muted: #6d7a8e;
+      --line: #e4e9f0;
+      --blue: #1677ff;
+      --blue-dark: #1459bd;
+      --green: #159a75;
+      --red: #d94645;
+      --panel: #fff;
+      --canvas: #f4f7fb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    }
+    .topbar {
+      height: 72px;
+      padding: 0 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand-mark {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      color: white; background: var(--blue); border-radius: 11px; font-size: 19px;
+    }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-weight: 400; font-size: 12px; }
+    .model-status { color: #426078; font-size: 13px; }
+    .model-status::before {
+      content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px;
+      background: #18a879; border-radius: 50%;
+    }
+    main { width: min(1180px, 92vw); margin: 36px auto 28px; }
+    .intro { margin-bottom: 22px; }
+    .intro h1 { margin: 0 0 8px; font-size: clamp(25px, 3vw, 34px); letter-spacing: -0.5px; }
+    .intro p { margin: 0; color: var(--muted); line-height: 1.7; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(330px, .85fr); gap: 20px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+      box-shadow: 0 8px 26px rgba(25, 49, 82, .045);
+    }
+    .image-card { padding: 20px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-head h2 { margin: 0; font-size: 16px; }
+    .subtle-pill {
+      padding: 6px 10px; border-radius: 99px; background: #f1f5fa;
+      color: #607189; font-size: 11px; letter-spacing: .3px;
+    }
+    .stage {
+      min-height: 500px; display: grid; place-items: center; position: relative; overflow: hidden;
+      border: 1px dashed #c9d3df; border-radius: 14px; background:
+        linear-gradient(45deg, #f8fafc 25%, transparent 25%),
+        linear-gradient(-45deg, #f8fafc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f8fafc 75%),
+        linear-gradient(-45deg, transparent 75%, #f8fafc 75%);
+      background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    }
+    .empty-state { max-width: 300px; padding: 24px; text-align: center; color: var(--muted); }
+    .empty-icon {
+      width: 58px; height: 48px; margin: 0 auto 14px; border: 2px solid #b7c8dc;
+      border-radius: 10px; position: relative;
+    }
+    .empty-icon::before { content: ""; position: absolute; left: 10px; top: 10px; width: 10px; height: 10px; border-radius: 50%; background: #a8c3df; }
+    .empty-icon::after { content: ""; position: absolute; left: 8px; bottom: 7px; width: 38px; height: 18px; background: #d8e6f5; clip-path: polygon(0 100%, 37% 24%, 58% 64%, 75% 40%, 100% 100%); }
+    .empty-state strong { display: block; margin-bottom: 6px; color: #34445a; }
+    .empty-state span { font-size: 13px; line-height: 1.7; }
+    #preview { max-width: 100%; max-height: 500px; object-fit: contain; display: block; }
+    #preview[hidden] { display: none; }
+    .image-badge {
+      position: absolute; top: 14px; left: 14px; padding: 10px 14px; border-radius: 10px;
+      color: #fff; background: rgba(22, 35, 56, .92); box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      font-size: 14px; font-weight: 700;
+    }
+    .image-badge.normal { background: rgba(21, 154, 117, .94); }
+    .image-badge.defect { background: rgba(217, 70, 69, .94); }
+    .image-actions { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+    button {
+      border: 0; border-radius: 10px; padding: 11px 17px; cursor: pointer;
+      font: inherit; font-weight: 600; transition: .15s ease;
+    }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    .secondary { background: #eef3f8; color: #31445d; }
+    .secondary:hover:not(:disabled) { background: #e2eaf3; }
+    .primary { color: #fff; background: var(--blue); box-shadow: 0 5px 12px rgba(22,119,255,.18); }
+    .primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .file-name { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .right-column { display: flex; flex-direction: column; gap: 20px; }
+    .result-card { padding: 21px; min-height: 262px; }
+    .result-title { margin: 0 0 17px; font-size: 16px; }
+    .result-summary {
+      display: flex; align-items: center; gap: 15px; padding: 17px;
+      background: #f6f8fb; border: 1px solid #edf0f4; border-radius: 13px;
+    }
+    .result-icon {
+      width: 45px; height: 45px; flex: 0 0 45px; display: grid; place-items: center;
+      color: #74839a; background: #e8edf3; border-radius: 13px; font-size: 20px; font-weight: 700;
+    }
+    .result-summary.normal .result-icon { color: var(--green); background: #def5ed; }
+    .result-summary.defect .result-icon { color: var(--red); background: #fde7e7; }
+    .result-text { min-width: 0; flex: 1; }
+    .result-text small { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+    .result-text h3 { margin: 0; font-size: 19px; line-height: 1.35; overflow-wrap: anywhere; }
+    .score-big { font-size: 23px; font-weight: 750; white-space: nowrap; }
+    .score-section { margin-top: 23px; }
+    .score-heading { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 13px; font-weight: 650; }
+    .score-note { color: var(--muted); font-size: 11px; font-weight: 400; }
+    .score-row { margin: 13px 0; }
+    .score-meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; font-size: 12px; }
+    .score-meta .class-name { color: #43536a; }
+    .score-meta .percent { min-width: 48px; color: #293b54; text-align: right; font-weight: 650; }
+    .track { height: 7px; overflow: hidden; border-radius: 99px; background: #edf1f6; }
+    .fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #539bff, #1677ff); transition: width .35s ease; }
+    .score-row.top .fill { background: linear-gradient(90deg, #31bd96, #159a75); }
+    .info-card { padding: 18px 21px; }
+    .info-card h2 { margin: 0 0 13px; font-size: 14px; }
+    .info-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #f0f2f5; color: var(--muted); font-size: 12px; }
+    .info-row strong { color: #35465d; font-weight: 600; text-align: right; }
+    .footnote { margin: 17px 2px 0; color: #79869a; font-size: 11px; line-height: 1.7; }
+    .message { min-height: 20px; margin: 10px 2px 0; color: var(--red); font-size: 12px; }
+    @media (max-width: 850px) {
+      .topbar { padding: 0 4vw; }
+      main { margin-top: 24px; }
+      .workspace { grid-template-columns: 1fr; }
+      .stage { min-height: 350px; }
+      #preview { max-height: 350px; }
+      .right-column { display: grid; grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">晶</div>
+      <div>晶粒缺陷识别<small>单张图片 · 四分类</small></div>
+    </div>
+    <div class="model-status" id="model-status">正在连接模型…</div>
+  </header>
+
+<!-- 页面主体：左侧选图预览，右侧类别结果与模型信息；id 用于 JavaScript 定位元素，修改时须同步下面脚本。 -->
+  <main>
+    <div class="intro">
+      <h1>晶粒缺陷可视化识别</h1>
+      <p>选择一张图片，查看模型对整张图片的判断类型和四类得分。</p>
+    </div>
+
+    <div class="workspace">
+      <section class="card image-card">
+        <div class="card-head">
+          <h2>图片预览</h2>
+          <span class="subtle-pill">整图分类 · 不定位缺陷位置</span>
+        </div>
+        <div class="stage" id="stage">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon"></div>
+            <strong>先选择一张晶粒图片</strong>
+            <span>模型将对整张图片进行四分类，不会生成缺陷框。</span>
+          </div>
+          <img id="preview" alt="待识别的晶粒图片" hidden>
+          <div class="image-badge" id="image-badge" hidden></div>
+        </div>
+        <div class="image-actions">
+          <input id="file-input" type="file" accept="image/*" hidden>
+          <button id="choose-button" class="secondary" type="button">选择图片</button>
+          <button id="predict-button" class="primary" type="button" disabled>开始识别</button>
+          <span id="file-name" class="file-name">尚未选择图片</span>
+        </div>
+        <div id="message" class="message" role="status"></div>
+      </section>
+
+      <div class="right-column">
+        <section class="card result-card">
+          <h2 class="result-title">识别结果</h2>
+          <div class="result-summary" id="result-summary">
+            <div class="result-icon" id="result-icon">?</div>
+            <div class="result-text">
+              <small id="result-caption">等待识别</small>
+              <h3 id="predicted-label">选择图片后开始</h3>
+            </div>
+            <div class="score-big" id="predicted-score">—</div>
+          </div>
+          <div class="score-section">
+            <div class="score-heading">
+              <span>四类模型得分</span>
+              <span class="score-note">Softmax 输出</span>
+            </div>
+            <div id="score-list"></div>
+          </div>
+        </section>
+
+        <section class="card info-card">
+          <h2>当前模型</h2>
+          <div class="info-row"><span>模型结构</span><strong id="model-name">读取中</strong></div>
+          <div class="info-row"><span>训练轮次</span><strong id="model-epoch">—</strong></div>
+          <div class="info-row"><span>推理设备</span><strong id="model-device">—</strong></div>
+          <div class="info-row"><span>权重文件</span><strong id="model-checkpoint">—</strong></div>
+        </section>
+      </div>
+    </div>
+    <p class="footnote">得分反映模型对整张图片的相对判断，不等于经过校准的真实概率；模型不提供缺陷位置或边界框。</p>
+  </main>
+
+<!-- JavaScript（浏览器执行的交互代码）：选图只在本地预览，点击识别才发送到本机 Python 服务。请通过服务网址打开页面。 -->
+  <script>
+    // 缓存页面元素：getElementById 根据 HTML 的 id 找到对应位置；变量不是模型参数。
+    const fileInput = document.getElementById("file-input");
+    const chooseButton = document.getElementById("choose-button");
+    const predictButton = document.getElementById("predict-button");
+    const preview = document.getElementById("preview");
+    const emptyState = document.getElementById("empty-state");
+    const imageBadge = document.getElementById("image-badge");
+    const resultSummary = document.getElementById("result-summary");
+    const message = document.getElementById("message");
+    const fileName = document.getElementById("file-name");
+    let selectedFile = null;
+    let previewUrl = null;
+
+    // 绑定点击事件：按钮代替隐藏的文件选择框打开系统选图窗口。
+    chooseButton.addEventListener("click", () => fileInput.click());
+
+    // 选择新图后生成本地预览，并清空旧结果；这里未进行神经网络识别。
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        message.textContent = "请选择常见格式的图片文件。";
+        fileInput.value = "";
+        return;
+      }
+      selectedFile = file;
+      // 释放上一张图的临时预览 URL，避免反复选图不断占用浏览器内存。
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      preview.src = previewUrl;
+      preview.hidden = false;
+      emptyState.hidden = true;
+      imageBadge.hidden = true;
+      fileName.textContent = file.name;
+      predictButton.disabled = false;
+      message.textContent = "";
+      resultSummary.className = "result-summary";
+      document.getElementById("result-caption").textContent = "已选择图片";
+      document.getElementById("predicted-label").textContent = "点击“开始识别”";
+      document.getElementById("predicted-score").textContent = "—";
+      document.getElementById("result-icon").textContent = "?";
+      document.getElementById("score-list").innerHTML = "";
+    });
+
+    // async/await 表示等待网络返回而不冻结页面；请求期间禁用按钮，避免连续重复提交。
+    predictButton.addEventListener("click", async () => {
+      if (!selectedFile) return;
+      predictButton.disabled = true;
+      predictButton.textContent = "识别中…";
+      message.textContent = "";
+      try {
+        // 发送 POST 到同一服务的 /api/predict，body 是原始 File 字节，不是表单。改接口需同步 app.py。
+        const response = await fetch("/api/predict", {
+          method: "POST",
+          headers: { "Content-Type": selectedFile.type || "application/octet-stream" },
+          body: selectedFile,
+        });
+        // JSON 是后端返回的键值数据；HTTP 错误也尝试读取 error 字段作为中文提示。
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "识别失败，请重试。");
+        showResult(data);
+      } catch (error) {
+        message.textContent = error.message || "无法连接推理服务，请确认服务仍在运行。";
+      // 无论成功或报错都恢复按钮；这里只恢复交互，不会重启后台模型服务。
+      } finally {
+        predictButton.disabled = false;
+        predictButton.textContent = "重新识别";
+      }
+    });
+
+    // 根据后端字段更新标签与条形分数，不在浏览器里再次计算分类。
+    // 若后端返回结构改名，需同步这里的 predicted_class/predicted_label/score/classes。
+    function showResult(data) {
+      // 目前严格以小写 normal 判断正常状态；若训练正常类改名，需同步这行与后端评估中的正常类识别。
+      const isNormal = data.predicted_class === "normal";
+      resultSummary.className = `result-summary ${isNormal ? "normal" : "defect"}`;
+      document.getElementById("result-icon").textContent = isNormal ? "✓" : "!";
+      document.getElementById("result-caption").textContent = isNormal ? "整图判断：正常" : "整图判断：缺陷类型";
+      document.getElementById("predicted-label").textContent = data.predicted_label;
+      document.getElementById("predicted-score").textContent = `${(data.score * 100).toFixed(2)}%`;
+
+      imageBadge.textContent = `${data.predicted_label} · ${(data.score * 100).toFixed(1)}%`;
+      imageBadge.className = `image-badge ${isNormal ? "normal" : "defect"}`;
+      imageBadge.hidden = false;
+
+      const scoreList = document.getElementById("score-list");
+      scoreList.replaceChildren();
+      // 逐类创建 DOM（页面元素）显示分数；0~1 的分数乘 100 变成百分数，toFixed 仅控制显示小数位。
+      for (const item of data.classes) {
+        const row = document.createElement("div");
+        row.className = `score-row ${item.name === data.predicted_class ? "top" : ""}`;
+        const meta = document.createElement("div");
+        meta.className = "score-meta";
+        const name = document.createElement("span");
+        name.className = "class-name";
+        name.textContent = item.label;
+        const percent = document.createElement("span");
+        percent.className = "percent";
+        percent.textContent = `${(item.score * 100).toFixed(2)}%`;
+        const track = document.createElement("div");
+        track.className = "track";
+        const fill = document.createElement("div");
+        fill.className = "fill";
+        // 条形宽度限制在 0~100%，仅是视觉防护，不改变模型输出或预测类别。
+        fill.style.width = `${Math.max(0, Math.min(100, item.score * 100))}%`;
+        track.append(fill);
+        meta.append(name, percent);
+        row.append(meta, track);
+        scoreList.append(row);
+      }
+    }
+
+    // 页面加载时读取模型名称、seed、最佳 epoch 与设备；显示的 epoch 是权重保存轮次，不是正在训练的轮次。
+    fetch("/api/info")
+      .then((response) => response.json())
+      .then((info) => {
+        document.getElementById("model-status").textContent = `模型已加载 · ${info.device_name}`;
+        document.getElementById("model-name").textContent = info.model_name;
+        document.getElementById("model-epoch").textContent = `seed ${info.seed} · epoch ${info.epoch}`;
+        document.getElementById("model-device").textContent = `${info.device_name} (${info.device})`;
+        document.getElementById("model-checkpoint").textContent = info.checkpoint;
+      })
+      .catch(() => {
+        document.getElementById("model-status").textContent = "模型服务连接失败";
+      });
+  </script>
+</body>
+</html>

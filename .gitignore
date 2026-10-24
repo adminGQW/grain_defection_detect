@@ -1,0 +1,12 @@
+﻿# 数据集与原始样本
+Task_data/
+Task_data_30_10_60_aug/
+**/misclassified_samples/
+detect_ui/test_pic/
+*.jpg
+*.jpeg
+
+# 本地缓存与编辑器配置
+__pycache__/
+*.py[cod]
+.idea/

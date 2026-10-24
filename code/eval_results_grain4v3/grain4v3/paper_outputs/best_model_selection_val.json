@@ -1,0 +1,8 @@
+{
+    "eval_split": "val",
+    "best_architecture": "repvit_v4",
+    "best_seed": 2026,
+    "best_run_macro_f1": 0.9966402113269616,
+    "best_run_accuracy": 0.9981435643564357,
+    "selection_rule": "Best architecture selected by highest mean val Macro-F1 across seeds; representative checkpoint selected by highest single-run val Macro-F1 within that architecture."
+}

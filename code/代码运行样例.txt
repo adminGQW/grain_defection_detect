@@ -1,0 +1,10 @@
+
+conda activate E:\个人工作\pylib\py39torch2_dcnv4
+
+cd e:
+
+cd E:\文档\2025尖兵\图片数据\朗讯\5月20所有数据合并\项目指标代码v3\code\
+
+python benchmark_grain_4class_repvit_project_v3_eval_misclass_fixed.py --data_root "../Task_data_30_10_60_aug" --task_name grain4v3 --output_root ./results_grain4v3 --models repvit_v4  --seeds 2026 --epochs 30 --batch_size 64 --num_workers 8 --img_size 224
+
+python benchmark_grain_4class_repvit_project_v3_eval_misclass_fixed.py --eval_only --data_root "../Task_data_30_10_60_aug" --task_name grain4v3 --checkpoint_root ./results_grain4v3 --eval_output_root ./eval_results_grain4v3 --eval_split val,test --models repvit_v4 --seeds 2026 --batch_size 64 --num_workers 8 --img_size 224

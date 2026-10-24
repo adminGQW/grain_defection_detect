@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="950" viewBox="0 0 1600 950">
+  <defs>
+    <style>
+      text{font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;fill:#19324b}
+      .title{font-size:36px;font-weight:700}.subtitle{font-size:19px;fill:#53677d}
+      .card{fill:#fff;stroke:#d9e3ee;stroke-width:2}.h{font-size:23px;font-weight:700}
+      .body{font-size:17px}.small{font-size:14px;fill:#52667b}.tiny{font-size:12px;fill:#52667b}
+      .blue{fill:#e9f2ff;stroke:#72a8e8;stroke-width:2}.teal{fill:#e5f7f3;stroke:#5abca9;stroke-width:2}
+      .purple{fill:#f0edff;stroke:#9185df;stroke-width:2}.orange{fill:#fff2df;stroke:#e6a44d;stroke-width:2}
+      .arrow{stroke:#72869a;stroke-width:3;fill:none;marker-end:url(#arr)}
+    </style>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#72869a"/></marker>
+  </defs>
+  <rect width="1600" height="950" fill="#f4f7fb"/>
+  <text x="58" y="68" class="title">第五讲｜一张晶粒图片，怎样变成四类判断？</text>
+  <text x="60" y="108" class="subtitle">先看数据怎么走：图片 → 特征 → 汇总 → 类别分数。下面是 repvit_v4 的简化结构图。</text>
+
+  <rect x="50" y="150" width="225" height="475" rx="20" class="card"/>
+  <rect x="295" y="150" width="285" height="475" rx="20" class="card"/>
+  <rect x="600" y="150" width="315" height="475" rx="20" class="card"/>
+  <rect x="935" y="150" width="270" height="475" rx="20" class="card"/>
+  <rect x="1225" y="150" width="325" height="475" rx="20" class="card"/>
+
+  <path d="M276 383 H290" class="arrow"/><path d="M581 383 H595" class="arrow"/>
+  <path d="M916 383 H930" class="arrow"/><path d="M1206 383 H1220" class="arrow"/>
+
+  <text x="75" y="194" class="h">① 输入图片</text>
+  <rect x="91" y="226" width="142" height="142" rx="10" fill="#eaf1f7" stroke="#b9cad9" stroke-width="2"/>
+  <g fill="#78a7a1">
+    <rect x="103" y="238" width="23" height="23"/><rect x="130" y="238" width="23" height="23" fill="#c5d7ce"/><rect x="157" y="238" width="23" height="23" fill="#648d88"/><rect x="184" y="238" width="23" height="23" fill="#a7c1b7"/>
+    <rect x="103" y="265" width="23" height="23" fill="#b4c9bf"/><rect x="130" y="265" width="23" height="23" fill="#6e9790"/><rect x="157" y="265" width="23" height="23" fill="#d0ddd4"/><rect x="184" y="265" width="23" height="23" fill="#7da49b"/>
+    <rect x="103" y="292" width="23" height="23" fill="#638c84"/><rect x="130" y="292" width="23" height="23" fill="#c9d9d0"/><rect x="157" y="292" width="23" height="23" fill="#89aca1"/><rect x="184" y="292" width="23" height="23" fill="#d6e1da"/>
+    <rect x="103" y="319" width="23" height="23" fill="#a7c0b5"/><rect x="130" y="319" width="23" height="23" fill="#6f978e"/><rect x="157" y="319" width="23" height="23" fill="#c1d2c9"/><rect x="184" y="319" width="23" height="23" fill="#789c93"/>
+  </g>
+  <text x="162" y="398" text-anchor="middle" class="small">示意图，不是真实样本</text>
+  <rect x="76" y="429" width="173" height="56" rx="12" class="blue"/>
+  <text x="162" y="463" text-anchor="middle" class="body">224×224 的 RGB 图</text>
+  <text x="78" y="526" class="body">B×3×224×224</text>
+  <text x="78" y="557" class="small">B = 一次处理的图片数</text>
+  <text x="78" y="585" class="small">3 = 红、绿、蓝三个颜色通道</text>
+
+  <text x="320" y="194" class="h">② RepViT 主干</text>
+  <text x="320" y="226" class="small">逐层提取并压缩图像特征</text>
+  <rect x="323" y="254" width="72" height="72" rx="8" class="blue"/>
+  <path d="M336 277 h46 M336 292 h46 M336 307 h46 M351 262 v56 M366 262 v56" stroke="#78a6d8" stroke-width="2"/>
+  <text x="410" y="281" class="body">阶段 1</text><text x="410" y="307" class="small">56×56×48</text>
+  <rect x="333" y="344" width="56" height="56" rx="8" class="blue"/>
+  <path d="M345 363 h32 M345 377 h32 M359 352 v40 M371 352 v40" stroke="#78a6d8" stroke-width="2"/>
+  <text x="410" y="366" class="body">阶段 2</text><text x="410" y="392" class="small">28×28×96</text>
+  <rect x="343" y="418" width="42" height="42" rx="7" class="blue"/>
+  <path d="M353 432 h22 M353 444 h22 M364 424 v30" stroke="#78a6d8" stroke-width="2"/>
+  <text x="410" y="437" class="body">阶段 3</text><text x="410" y="463" class="small">14×14×192</text>
+  <rect x="353" y="485" width="28" height="28" rx="6" class="blue"/>
+  <path d="M360 494 h14 M360 502 h14 M367 489 v20" stroke="#78a6d8" stroke-width="1.5"/>
+  <text x="410" y="497" class="body">阶段 4</text><text x="410" y="523" class="small">7×7×384</text>
+  <text x="320" y="568" class="small">格子变少，通道变多：</text>
+  <text x="320" y="594" class="small">空间更紧凑，特征更丰富</text>
+
+  <text x="625" y="194" class="h">③ 两个增强模块</text>
+  <rect x="622" y="225" width="271" height="145" rx="16" class="teal"/>
+  <text x="642" y="260" class="h" style="font-size:21px">DSK｜看不同范围</text>
+  <circle cx="658" cy="302" r="17" fill="#70c7b5"/><circle cx="700" cy="302" r="17" fill="#4db29f"/><circle cx="742" cy="302" r="17" fill="#309b89"/>
+  <text x="658" y="308" text-anchor="middle" class="tiny">小</text><text x="700" y="308" text-anchor="middle" class="tiny">中</text><text x="742" y="308" text-anchor="middle" class="tiny">大</text>
+  <text x="642" y="343" class="small">每个位置自适应混合三种尺度</text>
+  <rect x="622" y="390" width="271" height="145" rx="16" class="purple"/>
+  <text x="642" y="425" class="h" style="font-size:21px">DSG｜组合通道线索</text>
+  <rect x="645" y="449" width="74" height="44" rx="9" fill="#d5cffb"/><text x="682" y="477" text-anchor="middle" class="small">线索 A</text>
+  <text x="738" y="479" class="h" style="font-size:24px">×</text>
+  <rect x="770" y="449" width="74" height="44" rx="9" fill="#c3baf5"/><text x="807" y="477" text-anchor="middle" class="small">线索 B</text>
+  <text x="642" y="516" class="small">两路特征逐点相乘，再投影回原通道</text>
+  <text x="625" y="570" class="body">输入与输出都是</text>
+  <text x="625" y="598" class="body" font-weight="700">B×384×7×7</text>
+
+  <text x="960" y="194" class="h">④ 分类头</text>
+  <rect x="961" y="233" width="218" height="65" rx="13" class="orange"/>
+  <text x="1070" y="260" text-anchor="middle" class="body">全局平均池化</text><text x="1070" y="283" text-anchor="middle" class="small">7×7 → 1×1</text>
+  <path d="M1070 302 v31" class="arrow"/>
+  <rect x="961" y="341" width="218" height="58" rx="13" class="blue"/>
+  <text x="1070" y="377" text-anchor="middle" class="body">压成 384 个数字</text>
+  <path d="M1070 402 v31" class="arrow"/>
+  <rect x="961" y="441" width="218" height="68" rx="13" class="orange"/>
+  <text x="1070" y="470" text-anchor="middle" class="body">Linear：384 → 4</text><text x="1070" y="495" text-anchor="middle" class="small">得到 4 个 logits</text>
+  <text x="960" y="550" class="small">logits 是原始类别分数，</text>
+  <text x="960" y="576" class="small">还不是概率。</text>
+
+  <text x="1250" y="194" class="h">⑤ 显示分类结果</text>
+  <rect x="1260" y="230" width="255" height="57" rx="13" class="purple"/>
+  <text x="1387" y="266" text-anchor="middle" class="body">Softmax → 四类概率分数</text>
+  <circle cx="1281" cy="328" r="8" fill="#66a6e8"/><text x="1301" y="334" class="body">正常</text>
+  <circle cx="1281" cy="378" r="8" fill="#5abca9"/><text x="1301" y="384" class="body">Pad 表面标记缺陷</text>
+  <circle cx="1281" cy="428" r="8" fill="#e6a44d"/><text x="1301" y="434" class="body">探针标记偏移缺陷</text>
+  <circle cx="1281" cy="478" r="8" fill="#9185df"/><text x="1301" y="484" class="body">表面污染缺陷</text>
+  <rect x="1260" y="526" width="255" height="60" rx="13" fill="#f3f7fa" stroke="#d7e1ea" stroke-width="2"/>
+  <text x="1387" y="552" text-anchor="middle" class="small">UI 显示预测类型与分数</text>
+  <text x="1387" y="574" text-anchor="middle" class="small">不定位、不框选缺陷位置</text>
+
+  <rect x="52" y="666" width="1496" height="177" rx="22" fill="#eaf1f7" stroke="#d4e0eb" stroke-width="2"/>
+  <text x="82" y="711" class="h">先用白话记住它：</text>
+  <rect x="82" y="735" width="325" height="76" rx="15" fill="#fff"/><text x="101" y="765" class="body" font-weight="700">RepViT</text><text x="101" y="793" class="small">把图片整理成一叠特征摘要</text>
+  <rect x="431" y="735" width="325" height="76" rx="15" fill="#fff"/><text x="450" y="765" class="body" font-weight="700">DSK</text><text x="450" y="793" class="small">在小、中、大范围之间分配权重</text>
+  <rect x="780" y="735" width="325" height="76" rx="15" fill="#fff"/><text x="799" y="765" class="body" font-weight="700">DSG</text><text x="799" y="793" class="small">把不同通道的线索组合起来</text>
+  <rect x="1129" y="735" width="385" height="76" rx="15" fill="#fff"/><text x="1148" y="765" class="body" font-weight="700">分类头</text><text x="1148" y="793" class="small">汇总成 4 个类别分数</text>
+  <text x="60" y="894" class="small">注意：这是按代码画的结构示意图，不是模型注意力热图；模型判断整张图的类别，不会输出缺陷框。</text>
+</svg>
